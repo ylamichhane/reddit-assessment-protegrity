@@ -57,7 +57,7 @@ const rateLimiter = new RateLimiter();
 
 // Reddit API configuration
 const REDDIT_API_BASE = 'https://www.reddit.com';
-const USER_AGENT = 'Protegrity-Reddit-Feed/1.0 (by /u/ylamichhane)';
+const USER_AGENT = 'Protegrity-Reddit-Feed/1.0 by ylamichhane';
 
 /**
  * Fetch posts from a subreddit with optimized query parameters
