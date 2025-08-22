@@ -50,7 +50,7 @@ export default function Pagination({
   };
 
   return (
-    <div className="flex items-center justify-center space-x-4 mt-8">
+    <nav className="flex items-center justify-center space-x-4 mt-8" aria-label="Pagination navigation" role="navigation">
       {/* Previous Button */}
       <button
         onClick={handlePrevious}
@@ -72,6 +72,7 @@ export default function Pagination({
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -84,7 +85,7 @@ export default function Pagination({
       </button>
 
       {/* Page Indicator */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2" aria-live="polite">
         <span className="text-sm text-gray-600">Page</span>
         <span className="px-3 py-1 text-sm font-medium text-secondary bg-white border border-gray-300 rounded-md">
           {currentPage}
@@ -113,6 +114,7 @@ export default function Pagination({
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -122,6 +124,6 @@ export default function Pagination({
           />
         </svg>
       </button>
-    </div>
+    </nav>
   );
 } 

@@ -66,7 +66,7 @@ export async function fetchPosts({
  */
 export async function getDefaultPosts(): Promise<FetchPostsResult> {
   return fetchPosts({
-    subreddit: 'programming',
+    subreddit: 'data',
     sort: 'hot',
     limit: 12,
   });

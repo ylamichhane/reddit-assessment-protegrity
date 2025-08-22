@@ -69,7 +69,7 @@ function ErrorMessage({ message }: { message: string }) {
 async function Posts({ searchParams }: PageProps) {
   const params = await searchParams;
   const page = parseInt(params.page || '1');
-  const subreddit = params.subreddit || 'programming';
+  const subreddit = params.subreddit || 'data';
   const sort = (params.sort as 'hot' | 'top' | 'new') || 'hot';
   const after = params['after'] as string | undefined;
   const before = params['before'] as string | undefined;
@@ -124,7 +124,7 @@ export default async function Home({ searchParams }: PageProps) {
             Curated posts from the developer community
           </p>
           <Controls
-            initialSubreddit={(params.subreddit || 'programming') as string}
+            initialSubreddit={(params.subreddit || 'data') as string}
             initialSort={((params.sort as 'hot' | 'top' | 'new') || 'hot') as 'hot' | 'top' | 'new'}
           />
         </div>
