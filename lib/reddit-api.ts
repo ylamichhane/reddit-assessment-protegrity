@@ -31,12 +31,15 @@ export interface RedditApiError {
 // Rate limiting utility
 class RateLimiter {
   private requests: number[] = [];
-  private readonly maxRequests = 30; // Reddit allows 30 requests per minute
+  private readonly maxRequests = 50; // More reasonable limit for Reddit's API (they allow 60/minute)
   private readonly windowMs = 60000; // 1 minute window
 
   async checkRateLimit(): Promise<void> {
     const now = Date.now();
+    // Remove requests older than the window
     this.requests = this.requests.filter(time => now - time < this.windowMs);
+    
+
     
     if (this.requests.length >= this.maxRequests) {
       const oldestRequest = this.requests[0];
@@ -44,10 +47,12 @@ class RateLimiter {
       throw new Error(`Rate limit exceeded. Please wait ${Math.ceil(waitTime / 1000)} seconds.`);
     }
     
+    // Add the current request timestamp
     this.requests.push(now);
   }
 }
 
+// Create a fresh rate limiter instance to reset state
 const rateLimiter = new RateLimiter();
 
 // Reddit API configuration
@@ -123,14 +128,23 @@ export async function fetchSubredditPosts(
     
     if (error instanceof Error) {
       if (error.message.includes('Rate limit')) {
-        throw new Error('Too many requests. Please try again in a minute.');
+        throw new Error('Too many requests. Please wait before trying again.');
       }
       if (error.message.includes('timeout')) {
         throw new Error('Request timed out. Please try again.');
       }
+      if (error.message.includes('429')) {
+        throw new Error('Rate limited by Reddit. Please wait a moment before trying again.');
+      }
+      if (error.message.includes('403')) {
+        throw new Error('Access denied by Reddit. This subreddit may be private or restricted.');
+      }
+      if (error.message.includes('404')) {
+        throw new Error('Subreddit not found. Please check the subreddit name.');
+      }
     }
     
-    throw new Error('Failed to fetch posts. Please try again later.');
+    throw new Error('Failed to fetch posts from Reddit. Please try again later.');
   }
 }
 

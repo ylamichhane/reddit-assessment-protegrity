@@ -65,20 +65,7 @@ const config: Config = {
     },
   },
 
-  // Safelist dynamic utilities and state variants you might generate at runtime
-  safelist: [
-    {
-      pattern: /(bg|text|border)-(primary|secondary|background|text|contrast)/,
-      variants: ["hover", "focus", "active", "dark"],
-    },
-    {
-      pattern: /(from|via|to)-(primary|secondary|contrast)/,
-    },
-    {
-      pattern: /(ring|shadow)-(sm|md|lg)/,
-      variants: ["hover", "focus"],
-    },
-  ],
+
 
   plugins: [
     // Basic accessibility enhancements
