@@ -6,46 +6,51 @@ interface PaginationProps {
   hasNextPage: boolean;
   hasPrevPage: boolean;
   currentPage: number;
-  onPageChange?: (page: number) => void;
+  after?: string | null;
+  before?: string | null;
 }
 
 export default function Pagination({
   hasNextPage,
   hasPrevPage,
   currentPage,
-  onPageChange,
+  after,
+  before,
 }: PaginationProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handlePageChange = (page: number, direction: 'next' | 'prev') => {
+  const handlePageChange = (direction: 'next' | 'prev') => {
     const params = new URLSearchParams(searchParams);
-    params.set('page', page.toString());
-    // Clear existing cursors so we don't mix
+    
+    // Clear existing cursors
     params.delete('after');
     params.delete('before');
-    // Carry forward the current cursor from URL into the opposite param
-    const currentAfter = searchParams.get('after');
-    const currentBefore = searchParams.get('before');
-    if (direction === 'next' && currentAfter) {
-      params.set('after', currentAfter);
+    
+    // Update page number
+    const newPage = direction === 'next' ? currentPage + 1 : currentPage - 1;
+    params.set('page', newPage.toString());
+    
+    if (direction === 'next' && after) {
+      // For next page, use the 'after' cursor from the current response
+      params.set('after', after);
+    } else if (direction === 'prev' && before) {
+      // For previous page, use the 'before' cursor from the current response
+      params.set('before', before);
     }
-    if (direction === 'prev' && currentBefore) {
-      params.set('before', currentBefore);
-    }
+    
     router.push(`/?${params.toString()}`);
-    onPageChange?.(page);
   };
 
   const handlePrevious = () => {
     if (hasPrevPage) {
-      handlePageChange(currentPage - 1, 'prev');
+      handlePageChange('prev');
     }
   };
 
   const handleNext = () => {
     if (hasNextPage) {
-      handlePageChange(currentPage + 1, 'next');
+      handlePageChange('next');
     }
   };
 

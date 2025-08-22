@@ -11,6 +11,7 @@ interface PageProps {
     before?: string;
     subreddit?: string;
     sort?: string;
+    page?: string;
   }>;
 }
 
@@ -54,7 +55,7 @@ function ErrorMessage({ message }: { message: string }) {
 // Posts component (Server Component)
 async function Posts({ searchParams }: PageProps) {
   const params = await searchParams;
-  const subreddit = params.subreddit || 'programming';
+  const subreddit = params.subreddit || 'data';
   const sort = (params.sort as 'hot' | 'top' | 'new') || 'hot';
   const after = params.after;
   const before = params.before;
@@ -74,6 +75,15 @@ async function Posts({ searchParams }: PageProps) {
 
   const hasNextPage = !!result.after;
   const hasPrevPage = !!result.before || (!!after && !result.after && result.posts.length > 0);
+  
+  // Calculate current page based on URL parameters
+  // We'll use a page parameter to track the current page number
+  let currentPage = parseInt(params.page || '1');
+  
+  // If we have an 'after' cursor but no page parameter, we're on page 2
+  if (after && !params.page) {
+    currentPage = 2;
+  }
 
   return (
     <>
@@ -87,7 +97,9 @@ async function Posts({ searchParams }: PageProps) {
         <Pagination
           hasNextPage={hasNextPage}
           hasPrevPage={hasPrevPage}
-          currentPage={1}
+          currentPage={currentPage}
+          after={result.after}
+          before={result.before}
         />
       )}
     </>
@@ -96,7 +108,7 @@ async function Posts({ searchParams }: PageProps) {
 
 export default async function Home({ searchParams }: PageProps) {
   const params = await searchParams;
-  const initialSubreddit = params.subreddit || 'programming';
+  const initialSubreddit = params.subreddit || 'data';
   const initialSort = (params.sort as 'hot' | 'top' | 'new') || 'hot';
 
   return (
