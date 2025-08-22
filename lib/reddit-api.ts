@@ -1,3 +1,17 @@
+import axios from 'axios';
+
+// Create axios instance with default configuration
+const redditApi = axios.create({
+  baseURL: 'https://www.reddit.com',
+  timeout: 15000,
+  headers: {
+    'User-Agent': 'Protegrity-Reddit-Feed/1.0 by ylamichhane',
+    'Accept': 'application/json',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Cache-Control': 'no-cache',
+  },
+});
+
 // Reddit API utility functions
 export interface RedditPost {
   id: string;
@@ -56,8 +70,7 @@ class RateLimiter {
 const rateLimiter = new RateLimiter();
 
 // Reddit API configuration
-const REDDIT_API_BASE = 'https://www.reddit.com';
-const USER_AGENT = 'Protegrity-Reddit-Feed/1.0 by ylamichhane';
+// Using axios instance with default configuration above
 
 /**
  * Fetch posts from a subreddit with optimized query parameters
@@ -90,43 +103,15 @@ export async function fetchSubredditPosts(
       params.append('before', before);
     }
 
-    const url = `${REDDIT_API_BASE}/r/${subreddit}/${sort}.json?${params.toString()}`;
+    const url = `/r/${subreddit}/${sort}.json`;
 
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': USER_AGENT,
-        'Accept': 'application/json',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Cache-Control': 'no-cache',
-      },
-      // Add timeout to prevent hanging requests
-      signal: AbortSignal.timeout(15000), // 15 second timeout
-      next: { revalidate: 300 }, // Cache for 5 minutes
+    const response = await redditApi.get(url, {
+      params: params,
     });
 
     console.log(response);
 
-    if (!response.ok) {
-      const errorMessage = `Reddit API error: ${response.status} ${response.statusText}`;
-      
-      // Handle specific HTTP status codes
-      if (response.status === 403) {
-        throw new Error('Access denied by Reddit. This subreddit may be private or restricted.');
-      }
-      if (response.status === 404) {
-        throw new Error('Subreddit not found. Please check the subreddit name.');
-      }
-      if (response.status === 429) {
-        throw new Error('Rate limited by Reddit. Please wait a moment before trying again.');
-      }
-      if (response.status === 503) {
-        throw new Error('Reddit service temporarily unavailable. Please try again later.');
-      }
-      
-      throw new Error(errorMessage);
-    }
-
-    const data: RedditResponse = await response.json();
+    const data: RedditResponse = response.data;
 
     // Transform and validate the response
     const posts = data.data.children
@@ -148,9 +133,13 @@ export async function fetchSubredditPosts(
   } catch (error) {
     console.error('Error fetching Reddit posts:', error);
     
-    // If the original subreddit failed and we haven't tried the fallback yet
-    if (subreddit !== fallbackSubreddit && error instanceof Error) {
-      if (error.message.includes('403') || error.message.includes('404')) {
+    // Handle axios errors
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const statusText = error.response?.statusText;
+      
+      // If the original subreddit failed and we haven't tried the fallback yet
+      if (subreddit !== fallbackSubreddit && (status === 403 || status === 404)) {
         console.log(`Trying fallback subreddit: ${fallbackSubreddit}`);
         try {
           // Try the fallback subreddit
@@ -159,23 +148,31 @@ export async function fetchSubredditPosts(
           console.error('Fallback subreddit also failed:', fallbackError);
         }
       }
+      
+      // Handle specific HTTP status codes
+      if (status === 403) {
+        throw new Error('Access denied by Reddit. This subreddit may be private or restricted.');
+      }
+      if (status === 404) {
+        throw new Error('Subreddit not found. Please check the subreddit name.');
+      }
+      if (status === 429) {
+        throw new Error('Rate limited by Reddit. Please wait a moment before trying again.');
+      }
+      if (status === 503) {
+        throw new Error('Reddit service temporarily unavailable. Please try again later.');
+      }
+      
+      throw new Error(`Reddit API error: ${status} ${statusText}`);
     }
     
+    // Handle other types of errors
     if (error instanceof Error) {
-      if (error.message.includes('Rate limit')) {
-        throw new Error('Too many requests. Please wait before trying again.');
-      }
       if (error.message.includes('timeout')) {
         throw new Error('Request timed out. Please try again.');
       }
-      if (error.message.includes('429')) {
-        throw new Error('Rate limited by Reddit. Please wait a moment before trying again.');
-      }
-      if (error.message.includes('403')) {
-        throw new Error('Access denied by Reddit. This subreddit may be private or restricted.');
-      }
-      if (error.message.includes('404')) {
-        throw new Error('Subreddit not found. Please check the subreddit name.');
+      if (error.message.includes('Rate limit')) {
+        throw new Error('Too many requests. Please wait before trying again.');
       }
     }
     
