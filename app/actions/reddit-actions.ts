@@ -38,8 +38,8 @@ export async function fetchPosts({
       };
     }
 
-    // Fetch posts from Reddit API
-    const result = await fetchSubredditPosts(subreddit, sort, limit, after, before);
+    // Fetch posts from Reddit API with fallback to programming subreddit
+    const result = await fetchSubredditPosts(subreddit, sort, limit, after, before, 'data');
 
     // Format posts for display
     const formattedPosts = result.posts.map(formatPostData);
@@ -66,7 +66,7 @@ export async function fetchPosts({
  */
 export async function getDefaultPosts(): Promise<FetchPostsResult> {
   return fetchPosts({
-    subreddit: 'data',
+    subreddit: 'programming',
     sort: 'hot',
     limit: 12,
   });

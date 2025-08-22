@@ -57,7 +57,7 @@ const rateLimiter = new RateLimiter();
 
 // Reddit API configuration
 const REDDIT_API_BASE = 'https://www.reddit.com';
-const USER_AGENT = 'Protegrity-Reddit-Feed/1.0 (by /u/your-username)';
+const USER_AGENT = 'Protegrity-Reddit-Feed/1.0 (https://github.com/protegrity/reddit-feed)';
 
 /**
  * Fetch posts from a subreddit with optimized query parameters
@@ -67,7 +67,8 @@ export async function fetchSubredditPosts(
   sort: 'hot' | 'top' | 'new' = 'hot',
   limit: number = 12,
   after?: string,
-  before?: string
+  before?: string,
+  fallbackSubreddit: string = 'data'
 ): Promise<{ posts: RedditPost[]; after: string | null; before: string | null }> {
   try {
     // Check rate limit before making request
@@ -95,13 +96,32 @@ export async function fetchSubredditPosts(
       headers: {
         'User-Agent': USER_AGENT,
         'Accept': 'application/json',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
       },
       // Add timeout to prevent hanging requests
-      signal: AbortSignal.timeout(10000), // 10 second timeout
+      signal: AbortSignal.timeout(15000), // 15 second timeout
+      next: { revalidate: 300 }, // Cache for 5 minutes
     });
 
     if (!response.ok) {
-      throw new Error(`Reddit API error: ${response.status} ${response.statusText}`);
+      const errorMessage = `Reddit API error: ${response.status} ${response.statusText}`;
+      
+      // Handle specific HTTP status codes
+      if (response.status === 403) {
+        throw new Error('Access denied by Reddit. This subreddit may be private or restricted.');
+      }
+      if (response.status === 404) {
+        throw new Error('Subreddit not found. Please check the subreddit name.');
+      }
+      if (response.status === 429) {
+        throw new Error('Rate limited by Reddit. Please wait a moment before trying again.');
+      }
+      if (response.status === 503) {
+        throw new Error('Reddit service temporarily unavailable. Please try again later.');
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const data: RedditResponse = await response.json();
@@ -125,6 +145,19 @@ export async function fetchSubredditPosts(
     };
   } catch (error) {
     console.error('Error fetching Reddit posts:', error);
+    
+    // If the original subreddit failed and we haven't tried the fallback yet
+    if (subreddit !== fallbackSubreddit && error instanceof Error) {
+      if (error.message.includes('403') || error.message.includes('404')) {
+        console.log(`Trying fallback subreddit: ${fallbackSubreddit}`);
+        try {
+          // Try the fallback subreddit
+          return await fetchSubredditPosts(fallbackSubreddit, sort, limit, after, before, fallbackSubreddit);
+        } catch (fallbackError) {
+          console.error('Fallback subreddit also failed:', fallbackError);
+        }
+      }
+    }
     
     if (error instanceof Error) {
       if (error.message.includes('Rate limit')) {
