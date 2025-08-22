@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import Image from 'next/image';
 import { fetchPosts } from './actions/reddit-actions';
 import RedditPostCard from '../components/RedditPostCard';
 import Pagination from '../components/Pagination';
@@ -116,12 +117,22 @@ export default async function Home({ searchParams }: PageProps) {
       <div className="min-h-screen bg-background">
         <header className="bg-white border-b border-gray-200 shadow-sm">
           <div className="container mx-auto px-4 py-6">
-            <h1 className="text-3xl font-bold text-secondary">
-              Protegrity Reddit Feed
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Curated posts from the developer community
-            </p>
+            <div className="flex items-center gap-4 mb-4">
+              <Image
+                src="/assets/logo.png"
+                alt="Protegrity"
+                width={140}
+                height={36}
+                className="h-9 w-auto"
+                priority
+              />
+              <div className="h-8 w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent"></div>
+              <div>
+                <p className="text-gray-600 mt-1 text-sm">
+                  Curated posts from the developer community
+                </p>
+              </div>
+            </div>
             
             <Suspense fallback={<div className="mt-4 h-8 bg-gray-200 rounded animate-pulse"></div>}>
               <Controls

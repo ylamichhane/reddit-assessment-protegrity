@@ -22,7 +22,7 @@ export default function RedditPostCard({ post }: RedditPostCardProps) {
   };
 
   return (
-    <article className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2">
+    <article className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-[#fa5a25] transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2">
       <div className="p-6">
         <h2 className="text-lg font-semibold text-secondary mb-3 line-clamp-2 hover:text-primary transition-colors duration-200">
           <a
@@ -60,7 +60,7 @@ export default function RedditPostCard({ post }: RedditPostCardProps) {
           <button
             onClick={handleSummarize}
             disabled={isSummarizing}
-            className="inline-flex items-center text-primary hover:text-primary/80 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center text-gray-600 hover:text-[#fa5a25] hover:underline text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             aria-label={`Summarize post: ${post.title}`}
           >
             {isSummarizing ? (
