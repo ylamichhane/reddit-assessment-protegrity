@@ -59,8 +59,8 @@ const dinPro = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "My App",
-  description: "A clean Next.js application",
+  title: "Protegrity Reddit Feed",
+  description: "A curated Reddit feed showcasing the latest posts and discussions",
 };
 
 export default function RootLayout({

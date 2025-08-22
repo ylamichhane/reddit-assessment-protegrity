@@ -82,7 +82,7 @@ const config: Config = {
 
   plugins: [
     // Basic accessibility enhancements
-    plugin(function ({ addBase, theme }) {
+    plugin(function ({ addBase, theme, addUtilities }) {
       // Focus-visible outlines with transition support
       addBase({
         ":focus-visible": {
@@ -111,6 +111,22 @@ const config: Config = {
             animationIterationCount: "1 !important",
             transitionDuration: "0.01ms !important",
           },
+        },
+      });
+
+      // Line clamp utilities
+      addUtilities({
+        '.line-clamp-2': {
+          'display': '-webkit-box',
+          '-webkit-line-clamp': '2',
+          '-webkit-box-orient': 'vertical',
+          'overflow': 'hidden',
+        },
+        '.line-clamp-3': {
+          'display': '-webkit-box',
+          '-webkit-line-clamp': '3',
+          '-webkit-box-orient': 'vertical',
+          'overflow': 'hidden',
         },
       });
     }),
