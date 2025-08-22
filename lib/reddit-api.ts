@@ -104,6 +104,8 @@ export async function fetchSubredditPosts(
       next: { revalidate: 300 }, // Cache for 5 minutes
     });
 
+    console.log(response);
+
     if (!response.ok) {
       const errorMessage = `Reddit API error: ${response.status} ${response.statusText}`;
       
