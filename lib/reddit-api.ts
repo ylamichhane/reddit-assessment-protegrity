@@ -5,7 +5,7 @@ const redditApi = axios.create({
   baseURL: 'https://www.reddit.com',
   timeout: 15000,
   headers: {
-    'User-Agent': 'Protegrity-Reddit-Feed/1.0 by ylamichhane',
+    'User-Agent': 'web:Protegrity-Reddit-Feed:v1.0.0 (by /u/ylamichhane)',
     'Accept': 'application/json',
     'Accept-Language': 'en-US,en;q=0.9',
     'Cache-Control': 'no-cache',
@@ -108,8 +108,6 @@ export async function fetchSubredditPosts(
     const response = await redditApi.get(url, {
       params: params,
     });
-
-    console.log(response);
 
     const data: RedditResponse = response.data;
 
