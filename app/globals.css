@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Override the default font-sans with DINPro */
+:root {
+  --font-sans: var(--font-din-pro), ui-sans-serif, system-ui, sans-serif;
+}
